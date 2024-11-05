@@ -1,0 +1,789 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EOSGenerators module Guide &mdash; CompactObject 1.9.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=60b3a732"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="TOVsolver module guide" href="test_TOVsolver.html" />
+    <link rel="prev" title="Call for Contributions" href="Contributor.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            CompactObject
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publications.html">Publications</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Contributor.html">Call for Contributions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Illustration Notebooks</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">EOSGenerators module Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#RMF-EOS">RMF EOS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#(a)-Load-crust-EOS-and-prepare-interface-EOS">(a) Load crust EOS and prepare interface EOS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#(b)-Defining-the-paramters">(b) Defining the paramters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#(c)-Connecting-Core-and-crust-EOS">(c) Connecting Core and crust EOS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Illustrating-the-power-of-Numba-accelerated-EoS-Generation">Illustrating the power of Numba accelerated EoS Generation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#(a)-Comparing-the-time-it-takes-to-generate-the-EoS">(a) Comparing the time it takes to generate the EoS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Polytrope-EOS">Polytrope EOS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#(a)-Connecting-crust-with-inner-crust">(a) Connecting crust with inner crust</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#(b)-Solve-TOV-with-this-EOS">(b) Solve TOV with this EOS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Strangeon-matter-EOS">Strangeon matter EOS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#(a)-Defining-the-EOS-parameters">(a) Defining the EOS parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">(b) Solve TOV with this EOS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Speed-of-sound-EOS">Speed of sound EOS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">(a) Defining the EOS parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">(b) Solve TOV with this EOS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="test_TOVsolver.html">TOVsolver module guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_Inference.html">RMF EOS inference pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="UnitConventionForDeveloper.html">Unit Convention for Developer</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">EOS generators module</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="crust_EOS.html">Crust Equation of state interpolation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EOS.html">EOS solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fastRMF_EoS.html">RMF EOS solver (numba speed up version)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">TOV solver module</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="EoS_import.html">Import Equation of State</a></li>
+<li class="toctree-l1"><a class="reference internal" href="main.html">Main functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TOV_solver.html">Solve TOV Equation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="speed_of_sound.html">Calculate Speed of Sound</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bayesian Inference module</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="BayesianSampler.html">Bayesian Inference smapler setup module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prior.html">Prior Definition Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Likelihood.html">Likelihood function definition module</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Postprocessing module</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Cornerplot.html">Postprocessing module: Cornerplot</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CompactObject</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">EOSGenerators module Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/test_EOSgenerators.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="EOSGenerators-module-Guide">
+<h1>EOSGenerators module Guide<a class="headerlink" href="#EOSGenerators-module-Guide" title="Link to this heading"></a></h1>
+<p>In this notebook, we will showcase all the EOS we currently implemented in our package.</p>
+<section id="RMF-EOS">
+<h2>RMF EOS<a class="headerlink" href="#RMF-EOS" title="Link to this heading"></a></h2>
+<p>First import all of the package that will be used here.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">EOSgenerators.crust_EOS</span> <span class="k">as</span> <span class="nn">crust</span>
+<span class="kn">import</span> <span class="nn">EOSgenerators.RMF_EOS</span> <span class="k">as</span> <span class="nn">RMF</span>
+<span class="kn">import</span> <span class="nn">EOSgenerators.Polytrope_EOS</span> <span class="k">as</span> <span class="nn">Polytrope</span>
+<span class="kn">import</span> <span class="nn">EOSgenerators.Strangeon_EOS</span> <span class="k">as</span> <span class="nn">Strangeon</span>
+<span class="kn">import</span> <span class="nn">TOVsolver.main</span> <span class="k">as</span> <span class="nn">main</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">TOVsolver.unit</span> <span class="kn">import</span> <span class="n">g_cm_3</span><span class="p">,</span> <span class="n">dyn_cm_2</span><span class="p">,</span> <span class="n">km</span><span class="p">,</span> <span class="n">Msun</span>
+</pre></div>
+</div>
+</div>
+<section id="(a)-Load-crust-EOS-and-prepare-interface-EOS">
+<h3>(a) Load crust EOS and prepare interface EOS<a class="headerlink" href="#(a)-Load-crust-EOS-and-prepare-interface-EOS" title="Link to this heading"></a></h3>
+<p>Define constants, and load the crust EOS into this notebook, since when we solve the equation of state to TOV equation, we need full scope of the equation of state. Here, crust eos file is ‘Tolos_crust_out.txt’, while we need to times g_cm_3 for energy density and dyn_cm_2 for pressure, that will be easier for treatment, no need worry about G and c.</p>
+<p>Then just connect the crust part with the interface part(the part between core equation of state and crust) by a PolyInterpolate function</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Tolos_crust_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;Test_Case/Tolos_crust_out.txt&quot;</span><span class="p">)</span>
+<span class="n">eps_crust_T_out</span> <span class="o">=</span> <span class="n">Tolos_crust_out</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">g_cm_3</span>
+<span class="n">pres_crust_T_out</span> <span class="o">=</span> <span class="n">Tolos_crust_out</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">dyn_cm_2</span>
+<span class="n">eps_com</span><span class="p">,</span> <span class="n">pres_com</span> <span class="o">=</span> <span class="n">crust</span><span class="o">.</span><span class="n">PolyInterpolate</span><span class="p">(</span><span class="n">eps_crust_T_out</span><span class="p">,</span> <span class="n">pres_crust_T_out</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="(b)-Defining-the-paramters">
+<h3>(b) Defining the paramters<a class="headerlink" href="#(b)-Defining-the-paramters" title="Link to this heading"></a></h3>
+<p>Defining the free prameters that we need to compute the equation of state, you could check our intro part of documentation or just check the original paper of us about details. <a class="reference external" href="https://arxiv.org/abs/2303.17518">Huang et al,2023</a></p>
+<p>After defined the equation of state parameters, we could call the ‘compute_EOS’ function from RMF, to compute full core equation of state.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m_sig</span> <span class="o">=</span> <span class="mf">495.0</span> <span class="o">/</span> <span class="mf">197.33</span>
+<span class="n">m_w</span> <span class="o">=</span> <span class="mf">3.96544</span>
+<span class="n">m_rho</span> <span class="o">=</span> <span class="mf">3.86662</span>
+
+<span class="n">g_sigma</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">107.5751</span><span class="p">)</span>
+<span class="n">g_omega</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">182.3949</span><span class="p">)</span>
+<span class="n">g_rho</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">206.4260</span><span class="p">)</span>
+
+<span class="n">kappa</span> <span class="o">=</span> <span class="mf">3.09114168</span> <span class="o">/</span> <span class="mf">197.33</span>
+<span class="n">lambda_0</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.00168015405</span>
+<span class="n">zeta</span> <span class="o">=</span> <span class="mf">0.024</span>
+<span class="n">Lambda_w</span> <span class="o">=</span> <span class="mf">0.045</span>
+<span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+    <span class="p">[</span><span class="n">m_sig</span><span class="p">,</span> <span class="n">m_w</span><span class="p">,</span> <span class="n">m_rho</span><span class="p">,</span> <span class="n">g_sigma</span><span class="p">,</span> <span class="n">g_omega</span><span class="p">,</span> <span class="n">g_rho</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">lambda_0</span><span class="p">,</span> <span class="n">zeta</span><span class="p">,</span> <span class="n">Lambda_w</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">eps</span><span class="p">,</span> <span class="n">pres</span> <span class="o">=</span> <span class="n">RMF</span><span class="o">.</span><span class="n">compute_EOS</span><span class="p">(</span><span class="n">eps_com</span><span class="p">,</span> <span class="n">pres_com</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="(c)-Connecting-Core-and-crust-EOS">
+<h3>(c) Connecting Core and crust EOS<a class="headerlink" href="#(c)-Connecting-Core-and-crust-EOS" title="Link to this heading"></a></h3>
+<p>These two line can easily connect the Equation of state we computed for core part by setting the parameters and the crust equation of state, to a full equation of state that prepared for next step output</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">eps_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">*</span><span class="n">eps_com</span><span class="p">,</span> <span class="o">*</span><span class="n">eps</span><span class="p">])</span>
+<span class="n">pres_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">*</span><span class="n">pres_com</span><span class="p">,</span> <span class="o">*</span><span class="n">pres</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>Here below is one of the possiblity, use our defined function, ‘OutputMR’ to compute out what the mass radius curve corresponding to this equation of state.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">MR</span> <span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">OutputMR</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">eps_total</span><span class="p">,</span> <span class="n">pres_total</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">MR</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">km</span><span class="p">,</span> <span class="n">MR</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;M [$M_{\odot}$]&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;R [km]&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mf">8.0</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/test_EOSgenerators_10_0.png" src="_images/test_EOSgenerators_10_0.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Illustrating-the-power-of-Numba-accelerated-EoS-Generation">
+<h2>Illustrating the power of Numba accelerated EoS Generation<a class="headerlink" href="#Illustrating-the-power-of-Numba-accelerated-EoS-Generation" title="Link to this heading"></a></h2>
+<p>We shall now run the same code but with the Numba accelerated version, comparing the times for EoS Generation.</p>
+<p>Keep in mind all previous definitions are still valid, all we need to change is a single line of code.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">EOSgenerators.fastRMF_EoS</span> <span class="k">as</span> <span class="nn">FastRMF</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">Tolos_crust_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;Tolos_crust_out.txt&quot;</span><span class="p">)</span>
+<span class="n">eps_crust_T_out</span> <span class="o">=</span> <span class="n">Tolos_crust_out</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">g_cm_3</span>
+<span class="n">pres_crust_T_out</span> <span class="o">=</span> <span class="n">Tolos_crust_out</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">dyn_cm_2</span>
+<span class="n">eps_com</span><span class="p">,</span> <span class="n">pres_com</span> <span class="o">=</span> <span class="n">crust</span><span class="o">.</span><span class="n">PolyInterpolate</span><span class="p">(</span><span class="n">eps_crust_T_out</span><span class="p">,</span> <span class="n">pres_crust_T_out</span><span class="p">)</span>
+
+<span class="n">m_sig</span> <span class="o">=</span> <span class="mf">495.0</span> <span class="o">/</span> <span class="mf">197.33</span>
+<span class="n">m_w</span> <span class="o">=</span> <span class="mf">3.96544</span>
+<span class="n">m_rho</span> <span class="o">=</span> <span class="mf">3.86662</span>
+
+<span class="n">g_sigma</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">107.5751</span><span class="p">)</span>
+<span class="n">g_omega</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">182.3949</span><span class="p">)</span>
+<span class="n">g_rho</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">206.4260</span><span class="p">)</span>
+
+<span class="n">kappa</span> <span class="o">=</span> <span class="mf">3.09114168</span> <span class="o">/</span> <span class="mf">197.33</span>
+<span class="n">lambda_0</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.00168015405</span>
+<span class="n">zeta</span> <span class="o">=</span> <span class="mf">0.024</span>
+<span class="n">Lambda_w</span> <span class="o">=</span> <span class="mf">0.045</span>
+<span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+    <span class="p">[</span><span class="n">m_sig</span><span class="p">,</span> <span class="n">m_w</span><span class="p">,</span> <span class="n">m_rho</span><span class="p">,</span> <span class="n">g_sigma</span><span class="p">,</span> <span class="n">g_omega</span><span class="p">,</span> <span class="n">g_rho</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">lambda_0</span><span class="p">,</span> <span class="n">zeta</span><span class="p">,</span> <span class="n">Lambda_w</span><span class="p">]</span>
+<span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<section id="(a)-Comparing-the-time-it-takes-to-generate-the-EoS">
+<h3>(a) Comparing the time it takes to generate the EoS<a class="headerlink" href="#(a)-Comparing-the-time-it-takes-to-generate-the-EoS" title="Link to this heading"></a></h3>
+<p>The reason why we test the time it takes to generate the EoS here is due to the fact that Numba is compiling the code, and as such the first run will take considerably longer to complete, but all other runs will be greatly faster.</p>
+<p>Warning: Do not rerun this cell, as the compilation time will be gone.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">### Normal RMF ####</span>
+
+<span class="n">first_run_time_normal</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">eps_fast</span><span class="p">,</span> <span class="n">pres_fast</span> <span class="o">=</span> <span class="n">RMF</span><span class="o">.</span><span class="n">compute_EOS</span><span class="p">(</span><span class="n">eps_com</span><span class="p">,</span> <span class="n">pres_com</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+<span class="n">first_run_time_normal</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">first_run_time_normal</span>
+
+<span class="n">time_for_20_runs_normal</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+    <span class="n">eps</span><span class="p">,</span> <span class="n">pres</span> <span class="o">=</span> <span class="n">RMF</span><span class="o">.</span><span class="n">compute_EOS</span><span class="p">(</span><span class="n">eps_com</span><span class="p">,</span> <span class="n">pres_com</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+<span class="n">time_for_20_runs_normal</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_for_20_runs_normal</span>
+
+
+<span class="c1">##### Fast RMF #####</span>
+
+<span class="n">first_run_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">eps_fast</span><span class="p">,</span> <span class="n">pres_fast</span> <span class="o">=</span> <span class="n">FastRMF</span><span class="o">.</span><span class="n">compute_EOS</span><span class="p">(</span><span class="n">eps_com</span><span class="p">,</span> <span class="n">pres_com</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+<span class="n">first_run_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">first_run_time</span>
+
+<span class="n">time_for_20_runs</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+    <span class="n">eps_fast</span><span class="p">,</span> <span class="n">pres_fast</span> <span class="o">=</span> <span class="n">FastRMF</span><span class="o">.</span><span class="n">compute_EOS</span><span class="p">(</span><span class="n">eps_com</span><span class="p">,</span> <span class="n">pres_com</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+<span class="n">time_for_20_runs</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time_for_20_runs</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;--------------------------------------------------------------------------------------&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">84</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">32</span> <span class="o">+</span> <span class="s2">&quot;Time Comparion Table&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">32</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">84</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">17</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Time for first run  with RMF-Normal  = </span><span class="si">{</span><span class="n">first_run_time_normal</span><span class="o">*</span><span class="mi">1000</span><span class="si">:</span><span class="s2">6.0f</span><span class="si">}</span><span class="s2"> ms&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">19</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">17</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Time for first run  with RMF-Fast    = </span><span class="si">{</span><span class="n">first_run_time</span><span class="o">*</span><span class="mi">1000</span><span class="w">       </span><span class="si">:</span><span class="s2">6.0f</span><span class="si">}</span><span class="s2"> ms&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">19</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">84</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">17</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Time for   20  runs with RMF-Normal  = </span><span class="si">{</span><span class="n">time_for_20_runs_normal</span><span class="o">*</span><span class="mi">1000</span><span class="si">:</span><span class="s2">6.0f</span><span class="si">}</span><span class="s2"> ms&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">19</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">17</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Time for   20  runs with RMF-Fast    = </span><span class="si">{</span><span class="n">time_for_20_runs</span><span class="o">*</span><span class="mi">1000</span><span class="w">       </span><span class="si">:</span><span class="s2">6.0f</span><span class="si">}</span><span class="s2"> ms&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">19</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">84</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">17</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Time for  all  runs with RMF-Normal  = </span><span class="si">{</span><span class="p">(</span><span class="n">first_run_time_normal</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">time_for_20_runs_normal</span><span class="p">)</span><span class="o">*</span><span class="mi">1000</span><span class="si">:</span><span class="s2">6.0f</span><span class="si">}</span><span class="s2"> ms&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">19</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">17</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Time for  all  runs with RMF-Fast    = </span><span class="si">{</span><span class="p">(</span><span class="n">first_run_time</span><span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="n">time_for_20_runs</span><span class="w">       </span><span class="p">)</span><span class="o">*</span><span class="mi">1000</span><span class="si">:</span><span class="s2">6.0f</span><span class="si">}</span><span class="s2"> ms (Has Compilation) &quot;</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">84</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">17</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Time for   1   run  with RMF-Normal  = </span><span class="si">{</span><span class="n">time_for_20_runs_normal</span><span class="o">*</span><span class="mi">1000</span><span class="o">/</span><span class="mi">20</span><span class="si">:</span><span class="s2">6.0f</span><span class="si">}</span><span class="s2"> ms  &quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">17</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">17</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Time for   1   run  with RMF-Fast    = </span><span class="si">{</span><span class="n">time_for_20_runs</span><span class="w">       </span><span class="o">*</span><span class="mi">1000</span><span class="o">/</span><span class="mi">20</span><span class="si">:</span><span class="s2">6.0f</span><span class="si">}</span><span class="s2"> ms&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">19</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">84</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">84</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;|&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">30</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Total Speed Up = </span><span class="si">{</span><span class="n">time_for_20_runs_normal</span><span class="o">/</span><span class="n">time_for_20_runs</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> x&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="mi">30</span> <span class="o">+</span> <span class="s2">&quot;|&quot;</span> <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;--------------------------------------------------------------------------------------&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+--------------------------------------------------------------------------------------
+|                                                                                    |
+|                                Time Comparion Table                                |
+|                                                                                    |
+|                 Time for first run  with RMF-Normal  =    700 ms                   |
+|                 Time for first run  with RMF-Fast    =   2525 ms                   |
+|                                                                                    |
+|                 Time for   20  runs with RMF-Normal  =  14176 ms                   |
+|                 Time for   20  runs with RMF-Fast    =    194 ms                   |
+|                                                                                    |
+|                 Time for  all  runs with RMF-Normal  =  14875 ms                   |
+|                 Time for  all  runs with RMF-Fast    =   2719 ms (Has Compilation) |
+|                                                                                    |
+|                 Time for   1   run  with RMF-Normal  =    709 ms                   |
+|                 Time for   1   run  with RMF-Fast    =     10 ms                   |
+|                                                                                    |
+|                                                                                    |
+|                              Total Speed Up = 73.13 x                              |
+--------------------------------------------------------------------------------------
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">eps_total_fast</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">*</span><span class="n">eps_com</span><span class="p">,</span> <span class="o">*</span><span class="n">eps_fast</span><span class="p">])</span>
+<span class="n">pres_total_fast</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">*</span><span class="n">pres_com</span><span class="p">,</span> <span class="o">*</span><span class="n">pres_fast</span><span class="p">])</span>
+
+<span class="n">compare_fig1</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eps_total_fast</span><span class="p">,</span> <span class="n">pres_total_fast</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Fast Version&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eps_total</span><span class="p">,</span> <span class="n">pres_total</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Normal Version&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;P $[fm^{-4}]$&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\epsilon$ $[fm^{-4}]$&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">compare_fig1</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/test_EOSgenerators_15_0.png" src="_images/test_EOSgenerators_15_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">MR_fast</span> <span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">OutputMR</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">eps_total_fast</span><span class="p">,</span> <span class="n">pres_total_fast</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+<span class="n">compare_fig2</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">MR_fast</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">km</span><span class="p">,</span> <span class="n">MR_fast</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Fast Version&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">MR</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">km</span><span class="p">,</span> <span class="n">MR</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Normal Version&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;M [$M_{\odot}$]&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;R [km]&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mf">8.0</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">compare_fig2</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/test_EOSgenerators_16_0.png" src="_images/test_EOSgenerators_16_0.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Polytrope-EOS">
+<h2>Polytrope EOS<a class="headerlink" href="#Polytrope-EOS" title="Link to this heading"></a></h2>
+<p>First import all the package that will be used.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">TOVsolver.main</span> <span class="k">as</span> <span class="nn">main</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">ode</span>
+<span class="kn">import</span> <span class="nn">EOSgenerators.Polytrope_EOS</span> <span class="k">as</span> <span class="nn">Polytrope</span>
+<span class="kn">import</span> <span class="nn">EOSgenerators.Strangeon_EOS</span> <span class="k">as</span> <span class="nn">Strangeon</span>
+<span class="kn">import</span> <span class="nn">EOSgenerators.crust_EOS</span> <span class="k">as</span> <span class="nn">crust</span>
+<span class="kn">from</span> <span class="nn">TOVsolver.unit</span> <span class="kn">import</span>  <span class="n">km</span><span class="p">,</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">MeV</span><span class="p">,</span><span class="n">fm</span><span class="p">,</span><span class="n">g_cm_3</span><span class="p">,</span><span class="n">dyn_cm_2</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span><span class="n">c</span>
+</pre></div>
+</div>
+</div>
+<p>The polytropic equation of state (Polytrope) is the most commonly used EOS in astrophysics, its advantage is assumed to be capable to simulate all EOS shape with given parameters. Here, we provide one of the computation for polytrope.</p>
+<section id="(a)-Connecting-crust-with-inner-crust">
+<h3>(a) Connecting crust with inner crust<a class="headerlink" href="#(a)-Connecting-crust-with-inner-crust" title="Link to this heading"></a></h3>
+<p>For polytrope, we first connecting it with crust as we did in RMF</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Tolos_crust_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;Test_Case/Tolos_crust_out.txt&quot;</span><span class="p">)</span>
+<span class="n">eps_crust_T_out</span> <span class="o">=</span> <span class="n">Tolos_crust_out</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">g_cm_3</span>
+<span class="n">pres_crust_T_out</span> <span class="o">=</span> <span class="n">Tolos_crust_out</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">dyn_cm_2</span>
+<span class="n">eps_com</span><span class="p">,</span> <span class="n">pres_com</span> <span class="o">=</span> <span class="n">crust</span><span class="o">.</span><span class="n">PolyInterpolate</span><span class="p">(</span><span class="n">eps_crust_T_out</span><span class="p">,</span> <span class="n">pres_crust_T_out</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Define a constant “Saturation density”, so that we know the EOS span from which lower limit to upper limit.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rho_ns</span> <span class="o">=</span> <span class="mf">267994004080000.03</span><span class="c1"># saturation density in cgs</span>
+<br/></pre></div>
+</div>
+</div>
+<p>We define a set of parameters, first three in theta are the parameters control the slope of each polytrope, and the last two are transition point from one segment to another. Details see the documentation about polytrope</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">theta</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mi">1</span><span class="o">*</span><span class="n">rho_ns</span><span class="p">,</span> <span class="mf">4.5</span><span class="o">*</span><span class="n">rho_ns</span><span class="p">]</span><span class="c1"># define the parameters</span>
+<span class="n">density</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mf">14.3</span><span class="p">,</span><span class="mf">15.6</span><span class="p">,</span><span class="mi">1000</span><span class="p">)</span> <span class="c1"># the core density from 10^(14.3) g/cm^3 to 10^(15.6) g/cm^3</span>
+<span class="n">pressures</span> <span class="o">=</span> <span class="n">Polytrope</span><span class="o">.</span><span class="n">compute_EOS</span><span class="p">(</span><span class="n">density</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+<span class="n">eps_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">*</span><span class="n">eps_com</span><span class="p">,</span> <span class="o">*</span><span class="n">density</span><span class="o">*</span><span class="n">g_cm_3</span><span class="p">])</span>
+<span class="n">pres_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">*</span><span class="n">pres_com</span><span class="p">,</span> <span class="o">*</span><span class="n">pressures</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="(b)-Solve-TOV-with-this-EOS">
+<h3>(b) Solve TOV with this EOS<a class="headerlink" href="#(b)-Solve-TOV-with-this-EOS" title="Link to this heading"></a></h3>
+<p>Here below we use the strangeon matter EOS to compute the mass radius curve.</p>
+<p>The following code calculates the mass and radius of the strange stars for the given EOS of the polytrope using our main.OutputMR</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">MR</span> <span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">OutputMR</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">eps_total</span><span class="p">,</span><span class="n">pres_total</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">MR</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">km</span> <span class="p">,</span> <span class="n">MR</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">Msun</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;M [$M_{\odot}$]&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;R [km]&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/test_EOSgenerators_29_0.png" src="_images/test_EOSgenerators_29_0.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Strangeon-matter-EOS">
+<h2>Strangeon matter EOS<a class="headerlink" href="#Strangeon-matter-EOS" title="Link to this heading"></a></h2>
+<p>First import all the package that will be used.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">TOVsolver.main</span> <span class="k">as</span> <span class="nn">main</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">ode</span>
+<span class="kn">from</span> <span class="nn">EOSgenerators</span> <span class="kn">import</span> <span class="n">EOS</span>
+
+<span class="kn">from</span> <span class="nn">TOVsolver.unit</span> <span class="kn">import</span>  <span class="n">km</span><span class="p">,</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">MeV</span><span class="p">,</span><span class="n">fm</span>
+</pre></div>
+</div>
+</div>
+<p>The strangeon matter EOS describes the strongly interacting matter in the solid state, and the compact star can be a self-bound quark star composed of strangeon matter. Therefore, in the following we present the bare quark star EOS without a crust.</p>
+<p>Note that the strangeon matter parameters we input are in the natural unit system. The quentity returned by the Strangeon_compute_EOS function is in the Geometric Unit System. Thus, here, the parameter epsilon and ns are in the units of <span class="math notranslate nohighlight">\(MeV/fm^{-3}\)</span>. So follow the unite conversion rule, if we are using this unit, we just time this unit to do compute</p>
+<section id="(a)-Defining-the-EOS-parameters">
+<h3>(a) Defining the EOS parameters<a class="headerlink" href="#(a)-Defining-the-EOS-parameters" title="Link to this heading"></a></h3>
+<p>Define the strangeon matter EOS that we will use to calculate the energy densities and pressures of the system. The following is an example of how to define the theta and Nq. For example, theta=[50, 0.24] means the example values for epsilon and ns: epsilon in units of MeV, ns in units of <span class="math notranslate nohighlight">\(fm^-3\)</span>. Nq is an integer, e.g. Nq=9, 12, 15, 18, 21, 24, 27</p>
+<p>For the definition of parameter n, the minimum value is 3<em>ns/Nq, the maximum value is about 0.16</em>8*3/Nq. Then we can generate,for example, 1000 points for the input of the srangeon matter EOS. Special note: If you are using this EOS, need a very fine grid for the EOS. From our test, 1000 points for this EOS is the minimum requirement</p>
+<p>Once we define the EOS parameters already, we can use the Strangeon_compute_EOS function to calcute the energy_density and pressure.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Nq</span><span class="o">=</span><span class="mi">18</span>
+<span class="n">epsilon</span><span class="o">=</span><span class="mi">50</span>
+<span class="n">ns</span><span class="o">=</span><span class="mf">0.24</span>
+<span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">Nq</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">ns</span><span class="p">])</span>
+<span class="n">n_min</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">theta</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">n_max</span> <span class="o">=</span> <span class="mf">0.16</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">/</span> <span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">n_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">n_min</span><span class="p">,</span> <span class="n">n_max</span><span class="p">,</span> <span class="mi">2000</span><span class="p">)</span>
+
+<span class="n">energy_densities</span><span class="p">,</span> <span class="n">pressures</span> <span class="o">=</span> <span class="n">Strangeon</span><span class="o">.</span><span class="n">compute_EOS</span><span class="p">(</span><span class="n">n_values</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;n values:&quot;</span><span class="p">,</span> <span class="n">n_values</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Energy densities:&quot;</span><span class="p">,</span> <span class="n">energy_densities</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Pressures:&quot;</span><span class="p">,</span> <span class="n">pressures</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+n values: [0.04       0.04008671 0.04017342 ... 0.21315991 0.21324662 0.21333333]
+Energy densities: [  204.61935484   205.0631334    205.50734538 ... 46616.1606005
+ 46711.98281964 46807.96367981]
+Pressures: [0.00000000e+00 1.98864796e-01 4.00749542e-01 ... 1.88749504e+05
+ 1.89139331e+05 1.89529799e+05]
+</pre></div></div>
+</div>
+</section>
+<section id="id1">
+<h3>(b) Solve TOV with this EOS<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>Here below we use the strangeon matter EOS to compute the mass radius curve.</p>
+<p>The following code calculates the mass and radius of the strange stars for the given EOS of the strange matter EOS. Since our energy_density and pressure are all in same unit <span class="math notranslate nohighlight">\(MeV/fm^{-3}\)</span> so all we need is to time this unit</p>
+<p>Input a given central pressure and central energy density, you will obtain the radius where the pressure is zero and the mass at that radius.</p>
+<p>Solve the TOV equations using each central pressure and energy density</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">MR</span><span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">OutputMR</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">energy_densities</span><span class="o">*</span> <span class="n">MeV</span><span class="o">/</span><span class="n">fm</span><span class="o">**</span><span class="mi">3</span>   <span class="p">,</span> <span class="n">pressures</span><span class="o">*</span> <span class="n">MeV</span><span class="o">/</span><span class="n">fm</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">MR</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">km</span> <span class="p">,</span> <span class="n">MR</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">Msun</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;M [$M_{\odot}$]&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;R [km]&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="c1"># ax.set_xlim(8.0, 20.0)</span>
+<span class="c1"># ax.set_ylim(0, 3)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/test_EOSgenerators_40_0.png" src="_images/test_EOSgenerators_40_0.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Speed-of-sound-EOS">
+<h2>Speed of sound EOS<a class="headerlink" href="#Speed-of-sound-EOS" title="Link to this heading"></a></h2>
+<p>First import all the package that will be used.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">TOVsolver.main</span> <span class="k">as</span> <span class="nn">main</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">EOSgenerators</span> <span class="kn">import</span> <span class="n">SpeedofSound_EOS</span>
+<span class="kn">import</span> <span class="nn">EOSgenerators.crust_EOS</span> <span class="k">as</span> <span class="nn">crust</span>
+<span class="kn">from</span> <span class="nn">TOVsolver.unit</span> <span class="kn">import</span> <span class="n">g_cm_3</span><span class="p">,</span> <span class="n">dyn_cm_2</span><span class="p">,</span> <span class="n">km</span><span class="p">,</span> <span class="n">Msun</span>
+</pre></div>
+</div>
+</div>
+<p>The Speed of sound EOS describes the core EOS of a compact star, so it should be connected with the crust EOS to form a full EOS. See <a class="reference external" href="https://arxiv.org/abs/1812.08188">https://arxiv.org/abs/1812.08188</a> for details.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Tolos_crust_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;Test_Case/Tolos_crust_out.txt&quot;</span><span class="p">)</span>
+<span class="n">eps_crust_T_out</span> <span class="o">=</span> <span class="n">Tolos_crust_out</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">g_cm_3</span>
+<span class="n">pres_crust_T_out</span> <span class="o">=</span> <span class="n">Tolos_crust_out</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">dyn_cm_2</span>
+<span class="n">eps_com</span><span class="p">,</span> <span class="n">pres_com</span> <span class="o">=</span> <span class="n">crust</span><span class="o">.</span><span class="n">PolyInterpolate</span><span class="p">(</span><span class="n">eps_crust_T_out</span><span class="p">,</span> <span class="n">pres_crust_T_out</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="id2">
+<h3>(a) Defining the EOS parameters<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p>To construct the Speed of sound EOS, we need to specify the outer crust EOS and the interface EOS, and then connect them with the core EOS.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x_last</span> <span class="o">=</span> <span class="n">eps_com</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">y_last</span> <span class="o">=</span> <span class="n">pres_com</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">dydx_last</span> <span class="o">=</span> <span class="p">(</span><span class="n">pres_com</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pres_com</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">eps_com</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">eps_com</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">CS_EOS</span> <span class="o">=</span> <span class="n">SpeedofSound_EOS</span><span class="o">.</span><span class="n">compute_EOS</span><span class="p">(</span><span class="n">x_last</span><span class="p">,</span> <span class="n">y_last</span><span class="p">,</span> <span class="n">dydx_last</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>In order to generate the parameters of the Speed of sound EOS, we need a list of 5 uniform random numbers between 0 and 1.</p>
+<p>After generate the parameters, we use function <code class="docutils literal notranslate"><span class="pre">check_a</span></code> to check if the parameters are valid.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cs_a</span> <span class="o">=</span> <span class="n">CS_EOS</span><span class="o">.</span><span class="n">gen_a</span><span class="p">((</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">CS_EOS</span><span class="o">.</span><span class="n">check_a</span><span class="p">(</span><span class="n">cs_a</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+True
+</pre></div></div>
+</div>
+</section>
+<section id="id3">
+<h3>(b) Solve TOV with this EOS<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<p>Here below we use the speed of sound EOS to compute the mass radius curve.</p>
+<p>First we calculate the core EOS.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">core_e_min</span> <span class="o">=</span> <span class="n">x_last</span>
+<span class="n">core_e_max</span> <span class="o">=</span> <span class="mf">2e16</span> <span class="o">*</span> <span class="n">g_cm_3</span>
+<span class="n">n_core_e</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">core_e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">geomspace</span><span class="p">(</span><span class="n">core_e_min</span><span class="p">,</span> <span class="n">core_e_max</span><span class="p">,</span> <span class="n">n_core_e</span><span class="p">)</span>
+<span class="n">core_p</span> <span class="o">=</span> <span class="n">CS_EOS</span><span class="o">.</span><span class="n">cal_core_p</span><span class="p">(</span><span class="n">core_e</span><span class="p">,</span> <span class="n">cs_a</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Then we concat the core EOS with the crust EOS.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">full_e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">eps_com</span><span class="p">,</span> <span class="n">core_e</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+<span class="n">full_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">pres_com</span><span class="p">,</span> <span class="n">core_p</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">dpi</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">full_e</span> <span class="o">/</span> <span class="n">g_cm_3</span><span class="p">,</span> <span class="n">full_p</span> <span class="o">/</span> <span class="n">dyn_cm_2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\epsilon\quad [g/cm^3]$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$P\quad [dyn/cm^2]$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/test_EOSgenerators_54_0.png" src="_images/test_EOSgenerators_54_0.png" />
+</div>
+</div>
+<p>Finally we compute the mass radius curve.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">MR</span> <span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">OutputMR</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">full_e</span><span class="p">,</span> <span class="n">full_p</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">dpi</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">MR</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">km</span><span class="p">,</span> <span class="n">MR</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">Msun</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">17</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Radius [km]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Mass [Msun]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/test_EOSgenerators_56_0.png" src="_images/test_EOSgenerators_56_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Contributor.html" class="btn btn-neutral float-left" title="Call for Contributions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="test_TOVsolver.html" class="btn btn-neutral float-right" title="TOVsolver module guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Chun Huang, Nicole Obsborn, Nathan Whitsett.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
